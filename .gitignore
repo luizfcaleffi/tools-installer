@@ -1,2 +1,9 @@
 *.Zone.Identifier
 *:Zone.Identifier
+
+# Binários de instalação (distribuídos via GitHub Releases)
+*.exe
+*.msi
+*.deb
+*.pkg
+*.dmg
