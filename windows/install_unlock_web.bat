@@ -22,7 +22,24 @@ curl -L "%RELEASE_URL%/%EXE_NAME%" -o "%LOCAL_PATH%\%EXE_NAME%"
 cd /d "%LOCAL_PATH%"
 start /wait "" "%EXE_NAME%" /VERYSILENT /SILENT /SUPPRESSMSGBOXES /LOG="%LOCAL_PATH%\install.log" /TOKEN=%TOKEN%
 
-:: 4. Limpeza — remove o instalador (140MB)
+:: 4. Validacao dos processos do agente (aguarda 10s para inicializacao)
+echo [%TIME%] Aguardando inicializacao dos processos do agente... >> "%LOCAL_PATH%\install.log"
+timeout /t 10 /nobreak > nul
+
+echo [%TIME%] Processos xOne encontrados: >> "%LOCAL_PATH%\install.log"
+tasklist 2>nul | findstr /I "XOne" >> "%LOCAL_PATH%\install.log"
+
+tasklist 2>nul | findstr /I "XOne" | find /C /V "" > "%LOCAL_PATH%\xone_count.tmp" 2>nul
+set /P XONE_COUNT= < "%LOCAL_PATH%\xone_count.tmp"
+del "%LOCAL_PATH%\xone_count.tmp" /Q 2>nul
+
+if %XONE_COUNT% GEQ 5 (
+    echo [OK] Validacao: %XONE_COUNT% processos xOne ativos >> "%LOCAL_PATH%\install.log"
+) else (
+    echo [ERRO] Validacao: %XONE_COUNT% processos encontrados, esperado 5 ou mais >> "%LOCAL_PATH%\install.log"
+)
+
+:: 5. Limpeza — remove o instalador (140MB)
 del "%LOCAL_PATH%\%EXE_NAME%" /Q
 
 :EOF

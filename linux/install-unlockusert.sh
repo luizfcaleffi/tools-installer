@@ -153,6 +153,34 @@ else
     log "[5/5] Extensao Chrome ignorada (--skip-chrome)"
 fi
 
+# [6/6] Validacao dos processos do agente
+log "[6/6] Aguardando inicializacao dos processos do agente (10s)..."
+sleep 10
+
+# Componentes esperados no path do agente
+EXPECTED_COMPONENTS=(
+    "EventSender"
+    "HeartBeat"
+    "LicenseManager"
+    "ProcessRunner"
+    "UpdateManager"
+)
+PROC_FAILED=0
+for component in "${EXPECTED_COMPONENTS[@]}"; do
+    if pgrep -f "xone-agent/Components/${component}" > /dev/null 2>&1; then
+        log "  OK: XOne Agent ${component}"
+    else
+        log_erro "  AUSENTE: XOne Agent ${component}"
+        PROC_FAILED=$((PROC_FAILED + 1))
+    fi
+done
+
+if [[ $PROC_FAILED -eq 0 ]]; then
+    log "  Validacao concluida: todos os processos do agente ativos"
+else
+    log_erro "  Validacao: $PROC_FAILED processo(s) ausente(s) — verificar manualmente"
+fi
+
 # Limpeza
 log "Limpeza: removendo $DEB_FILE"
 rm -f "$DEB_FILE"
